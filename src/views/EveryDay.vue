@@ -30,7 +30,7 @@ onMounted(async () => {
 
 const loadJSON = async () => {
   try {
-    const response = await fetch('/src/data/word_dict_all.json');
+    const response = await fetch('/word_dict_all.json');
     const data = await response.json();
     jsonData.value = data;
   } catch (error) {

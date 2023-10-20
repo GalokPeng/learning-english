@@ -48,13 +48,13 @@ import { showNotify } from 'vant';
 const container = ref(null);
 const active = ref();
 const tabs = [
-  { title: '中考', filepath: '/src/data/word_dict_zk.json' },
-  { title: '高考', filepath: '/src/data/word_dict_gk.json' },
-  { title: '四级', filepath: '/src/data/word_dict_cet4.json' },
-  { title: '六级', filepath: '/src/data/word_dict_cet6.json' },
-  { title: '考研', filepath: '/src/data/word_dict_ky.json' },
-  { title: '雅思', filepath: '/src/data/word_dict_ielts.json' },
-  { title: '托福', filepath: '/src/data/word_dict_toefl.json' },
+  { title: '中考', filepath: '/word_dict_zk.json' },
+  { title: '高考', filepath: '/word_dict_gk.json' },
+  { title: '四级', filepath: '/word_dict_cet4.json' },
+  { title: '六级', filepath: '/word_dict_cet6.json' },
+  { title: '考研', filepath: '/word_dict_ky.json' },
+  { title: '雅思', filepath: '/word_dict_ielts.json' },
+  { title: '托福', filepath: '/word_dict_toefl.json' },
 ];
 // const onClickTab = ({ dataLength }) => showToast(dataLength);
 // import jsonfile from "@/data/word_dict_test.json";
