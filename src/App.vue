@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // import { Button } from 'vant';
-import Menu from "@/views/Menu.vue";
+import Menu from "./views/Menu.vue";
 </script>
 
 <template>

@@ -1,10 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HelloWorld from '@/components/HelloWorld.vue'
-import Type from '@/views/Type.vue'
-import EveryDay from '@/views/EveryDay.vue'
-import EveryWeek from '@/views/EveryWeek.vue'
-import Home from '@/views/Home.vue'
-import Personnel from '@/views/Personnel.vue'
+import Type from '../views/Type.vue'
+import EveryDay from '../views/EveryDay.vue'
+import EveryWeek from '../views/EveryWeek.vue'
+import Home from '../views/Home.vue'
+import Personnel from '../views/Personnel.vue'
 const routes = [
   {
     path: "/",
