@@ -28,7 +28,7 @@
   </div> -->
 </template>
 <script setup lang="ts">
-import { ref, onMounted} from 'vue';
+import { ref} from 'vue';
 const activeNames = ref([]);
 // const items = ref<WordData[]>([]);
 // const datetime = Date.now()
@@ -53,7 +53,7 @@ const dbName = 'PLearningEnglish'; // 替换成你的数据库名称
 const request = indexedDB.open(dbName);
 const dataBig = ref("");
 request.onsuccess = function(event) {
-  const db = event.target.result;
+  const db = (event.target as IDBRequest).result;
 
   // 获取数据库的事务对象
   const transaction = db.transaction(db.objectStoreNames, 'readonly');
@@ -62,7 +62,7 @@ request.onsuccess = function(event) {
   const objectStores = Array.from(transaction.db.objectStoreNames);
 
   // 初始化总空间变量
-  let totalSpace = 0;
+  // let totalSpace = 0;
 
   // 遍历每个Object Store并获取其占用的空间
   objectStores.forEach(storeName => {
@@ -71,12 +71,12 @@ request.onsuccess = function(event) {
 
     request.onsuccess = function() {
       const keys = request.result;
-      const storeSpace = keys.reduce((space, key) => {
+      const storeSpace = keys.reduce((space: any, key: any) => {
         return space + key.toString().length;
       }, 0);
       dataBig.value = `${(storeSpace/1024).toFixed(3)} KB`
       console.log(`Object Store "${storeName}" 占用空间: ${(storeSpace/1024).toFixed(3)} KB`);
-      totalSpace += storeSpace;
+      // totalSpace += storeSpace;
     };
   });
   // // 输出总空间
@@ -84,7 +84,7 @@ request.onsuccess = function(event) {
 };
 
 request.onerror = function(event) {
-  console.error('无法打开数据库:', event.target.error);
+  console.error('无法打开数据库:', (event.target as IDBRequest).error);
 };
 
 </script>

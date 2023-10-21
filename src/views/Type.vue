@@ -31,7 +31,7 @@
             :title="item.sw"
             :name="item.sw"
           > 
-            <!-- <van-button square type="primary" text="选择" @click="addItem(item)" /> -->
+            <van-button square type="primary" text="选择" @click="addItem(item)" />
             <div>【音标】: {{ item.phonetic }}</div>
             <div>【翻译】:</div><div class="text-with-line-breaks" v-html="formatNewlines(item.translation)"></div>
             <div>【定义】: {{ item.definition }}</div>
@@ -88,7 +88,7 @@ async function loadJSON(filepath) {
         return filterData.slice(startIndex, endIndex);
       }
     });
-    console.log(paginatedData.value)
+    // console.log(paginatedData.value)
   } catch (error) {
     console.error('加载JSON文件时发生错误:', error);
   }

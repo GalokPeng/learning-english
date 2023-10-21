@@ -23,13 +23,13 @@
       </van-sticky>
       <van-tab v-for="tab in tabs" :key="tab.title" :title="tab.title">
         <van-collapse v-model="activeNames" accordion>
-          <van-swipe-cell v-for="(item) in paginatedData.value" :key="item.sw">
+          <van-swipe-cell v-for="item in paginatedData.value" :key="item.id">
             <van-collapse-item
               :key="item.sw"
               :title="item.sw"
               :name="item.sw"
             > 
-              <!-- <van-button square type="danger" text="删除" @click="deleteItem(item.id)" /> -->
+              <van-button square type="danger" text="删除" @click="deleteItem(item.id)" />
               <div>【音标】: {{ item.phonetic }}</div>
               <div>【翻译】:</div><div class="text-with-line-breaks" v-html="formatNewlines(item.translation)"></div>
               <div>【定义】: {{ item.definition }}</div>
@@ -54,7 +54,7 @@ const activeNames = ref(1);
 const active = ref();
 const pageSize = 20; // 每页显示的数据量
 const currentPage = ref(1);
-const paginatedData = ref([]);
+const paginatedData: any = ref([]);
 const dataLength = ref(0);
 // 声明 searchValue 变量
 const searchValue = ref(""); // 请确保适当初始化 searchValue
@@ -66,7 +66,7 @@ const tabs = [
 // 获取所有单词
 async function getAllItems(type: number|undefined) {
   try {
-    const filterItems = await db.selectWordTable.where('type').equals(type).toArray();
+    const filterItems = await db.selectWordTable.where('type').equals(type||0).toArray();
     // console.log(filterItems.length);
     // 在 computed 外部定义 computed 属性，以便在其他地方使用
     paginatedData.value = computed(() => {
@@ -77,7 +77,7 @@ async function getAllItems(type: number|undefined) {
         return filterItems.slice(startIndex, endIndex);
       } else {
         // 使用 filter 方法筛选包含 searchValue 的数据项
-        const filterData = filterItems.filter(item => {
+        const filterData = filterItems.filter((item: { sw: string|any[]; }) => {
           // console.log(item);
           // 根据你的匹配逻辑来判断是否保留 item
           return item.sw?.includes(searchValue.value.toLowerCase()); // 例如，假设要匹配某个属性
@@ -91,7 +91,7 @@ async function getAllItems(type: number|undefined) {
     console.error('加载数据时发生错误:', error);
   }
 }
-watch(active, (newActive) => {
+watch(active, (newActive:number) => {
   // console.log(newActive);
   getAllItems(tabs[newActive].type);
   currentPage.value = 1; // 重置页数
@@ -101,7 +101,7 @@ onMounted(async () => {
   await getAllItems(tabs[0].type);
 });
 // 删除单词
-async function deleteItem(id) {
+async function deleteItem(id: number) {
   // 如果找到匹配的单词，执行删除操作
   await db.selectWordTable.delete(id);
   // console.log('Deleted item with sw:', id);
@@ -136,10 +136,10 @@ async function deleteItem(id) {
 
 //   dailyWords.value = selectedWords;
 // };
-function formatNewlines(text) {
+function formatNewlines(text: string) {
   return text.replace(/\n/g, '<br>');
 }
-function handlePageChange(newPage) {
+function handlePageChange(newPage: number) {
   currentPage.value = newPage;
 }
 </script>
