@@ -22,7 +22,7 @@
     </van-sticky>
     <van-tab v-for="tab in tabs" :key="tab.title" :title="tab.title">
       <van-collapse v-model="activeNames" accordion>
-        <van-swipe-cell v-for="(item) in paginatedData.value" :key="item.sw">
+        <van-swipe-cell v-for="(item) in paginatedData.value" :key="item.id">
           <template #left>
             <van-button square type="primary" text="添加" @click="addItem(item)" />
           </template>
@@ -31,7 +31,7 @@
             :title="item.sw"
             :name="item.sw"
           > 
-            <van-button square type="primary" text="选择" @click="addItem(item)" />
+            <!-- <van-button square type="primary" text="选择" @click="addItem(item)" /> -->
             <div>【音标】: {{ item.phonetic }}</div>
             <div>【翻译】:</div><div class="text-with-line-breaks" v-html="formatNewlines(item.translation)"></div>
             <div>【定义】: {{ item.definition }}</div>

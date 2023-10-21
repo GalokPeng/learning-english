@@ -29,7 +29,7 @@
               :title="item.sw"
               :name="item.sw"
             > 
-              <van-button square type="danger" text="删除" @click="deleteItem(item.id)" />
+              <!-- <van-button square type="danger" text="删除" @click="deleteItem(item.id)" /> -->
               <div>【音标】: {{ item.phonetic }}</div>
               <div>【翻译】:</div><div class="text-with-line-breaks" v-html="formatNewlines(item.translation)"></div>
               <div>【定义】: {{ item.definition }}</div>
