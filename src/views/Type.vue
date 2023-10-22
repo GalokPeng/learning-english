@@ -1,5 +1,5 @@
 <template>
-  <van-search v-model="searchValue" placeholder="请输入搜索关键字母" />
+  <van-search v-model="searchValue" placeholder="请输入搜索关键字母或者中文" />
   <van-tabs v-model:active="active" sticky type="card">
     <van-sticky :offset-top="30">
       <van-pagination
@@ -32,9 +32,9 @@
             :name="item.sw"
           > 
             <!-- <van-button square type="primary" text="选择" @click="addItem(item)" /> -->
-            <div>【音标】: {{ item.phonetic }}</div>
+            <div>【音标】: [{{ item.phonetic }}]</div>
             <div>【翻译】:</div><div class="text-with-line-breaks" v-html="formatNewlines(item.translation)"></div>
-            <div>【定义】: {{ item.definition }}</div>
+            <div>【定义】:</div><div class="text-with-line-breaks" v-html="formatNewlines(item.definition)"></div>
           </van-collapse-item>
         </van-swipe-cell>
       </van-collapse>
@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted,watch  } from 'vue';
+import { ref, computed, onMounted, watch  } from 'vue';
 import { showNotify,showLoadingToast } from 'vant';
 import { db } from "../database"
 const active = ref();
@@ -82,7 +82,8 @@ async function loadJSON(filepath) {
         // 使用 filter 方法筛选包含 searchValue 的数据项
         const filterData = jsonData.value.filter(item => {
             // 根据你的匹配逻辑来判断是否保留 item
-            return item.sw?.includes(searchValue.value.toLowerCase()); // 例如，假设要匹配某个属性
+            return item.sw?.includes(searchValue.value.toLowerCase()) ||
+              item.translation?.includes(searchValue.value.toLowerCase()); // 例如，假设要匹配某个属性
         })
         dataLength.value = filterData.length
         return filterData.slice(startIndex, endIndex);
@@ -116,6 +117,7 @@ onMounted(() => {
 async function addItem(item) {
   const existingItem = await db.selectWordTable.where('sw').equals(item.sw).first();
   if (existingItem) {
+    showNotify({ type: 'warning', message: '你添加过该单词了！' });
     // 如果已存在相同的 sw，可以选择不添加或执行更新操作
     return; // 不执行添加操作
   }
@@ -126,15 +128,13 @@ async function addItem(item) {
     translation: item.translation,
     definition: item.definition,
     datetime: datetime,
-    type: 0
+    type: 0,
+    level: 0,
   };
   const id = await db.selectWordTable.add(newItem);
-  console.log('Added item with ID:', id);
+  // console.log('Added item with ID:', id);
+  showNotify({ type: 'success', message: '添加成功！' });
 }
-
-
-
-
 </script>
 <style scoped>
 </style>

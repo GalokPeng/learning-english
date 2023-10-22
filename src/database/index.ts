@@ -6,7 +6,7 @@ class PLearningEnglish extends Dexie {
   constructor() {
     super('PLearningEnglish');
     this.version(1).stores({
-      selectWordTable: '++id, sw, phonetic,translation,definition,datetime,type',
+      selectWordTable: '++id, sw, phonetic,translation,definition,datetime,type,level',
     });
     this.selectWordTable = this.table('selectWordTable');
   }
@@ -20,6 +20,7 @@ interface WordData {
   definition: string;
   datetime:number;
   type:number;
+  level:number;
 }
 
 export const db = new PLearningEnglish();
