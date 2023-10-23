@@ -6,7 +6,7 @@ class PLearningEnglish extends Dexie {
   constructor() {
     super('PLearningEnglish');
     this.version(1).stores({
-      selectWordTable: '++id, sw, phonetic,translation,definition,datetime,type,level',
+      selectWordTable: '++id,word,sw,phonetic,translation,definition,tag,datetime,type,level,isSelect',
     });
     this.selectWordTable = this.table('selectWordTable');
   }
@@ -14,13 +14,16 @@ class PLearningEnglish extends Dexie {
 
 interface WordData {
   id?: number;
+  word: string;
   sw: string;
   phonetic: string;
   translation: string;
   definition: string;
+  tag: any;
   datetime:number;
   type:number;
   level:number;
+  isSelect:boolean;
 }
 
 export const db = new PLearningEnglish();

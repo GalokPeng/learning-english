@@ -24,12 +24,12 @@
       <van-collapse v-model="activeNames" accordion>
         <van-swipe-cell v-for="(item) in paginatedData.value" :key="item.id">
           <template #left>
-            <van-button square type="primary" text="添加" @click="addItem(item)" />
+            <van-button square type="primary" text="添加" @click="addItem(item.id)" />
           </template>
           <van-collapse-item
-            :key="item.sw"
-            :title="item.sw"
-            :name="item.sw"
+            :key="item.word"
+            :title="item.word"
+            :name="item.word"
           > 
             <!-- <van-button square type="primary" text="选择" @click="addItem(item)" /> -->
             <div>【音标】: [{{ item.phonetic }}]</div>
@@ -39,37 +39,47 @@
         </van-swipe-cell>
       </van-collapse>
     </van-tab>
+    <van-row>
+      <van-col span="12">
+        <van-button :loading="addAllLoading" type="primary" block @click="addAllItem()">全部导入计划列表</van-button>
+      </van-col>
+      <van-col span="12">
+        <van-button :loading="removeAllLoading" type="danger" block @click="removeAllItem()">全部移除计划列表</van-button>
+      </van-col>
+    </van-row>
   </van-tabs>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch  } from 'vue';
-import { showNotify,showLoadingToast } from 'vant';
+import { showNotify } from 'vant';
 import { db } from "../database"
 const active = ref();
 const tabs = [
-  { title: '中考', filepath: '/word_dict_zk.json' },
-  { title: '高考', filepath: '/word_dict_gk.json' },
-  { title: '四级', filepath: '/word_dict_cet4.json' },
-  { title: '六级', filepath: '/word_dict_cet6.json' },
-  { title: '考研', filepath: '/word_dict_ky.json' },
-  { title: '雅思', filepath: '/word_dict_ielts.json' },
-  { title: '托福', filepath: '/word_dict_toefl.json' },
+  { title: '中考', name: 'zk' },
+  { title: '高考', name: 'gk' },
+  { title: '四级', name: 'cet4' },
+  { title: '六级', name: 'cet6' },
+  { title: '考研', name: 'ky' },
+  { title: '雅思', name: 'ielts' },
+  { title: '托福', name: 'toefl' },
 ];
 // const onClickTab = ({ dataLength }) => showToast(dataLength);
 // import jsonfile from "@/data/word_dict_test.json";
 const activeNames = ref(1);
-const jsonData = ref([]);
+const jsonData:any = ref([]);
 const pageSize = 20; // 每页显示的数据量
 const currentPage = ref(1);
-const paginatedData = ref([]);
+const paginatedData:any = ref([]);
 const dataLength = ref(0);
+const selectName:any = ref("");
 // 声明 searchValue 变量
 const searchValue = ref(""); // 请确保适当初始化 searchValue
-async function loadJSON(filepath) {
+async function loadJSON(name:string) {
   try {
-    const response = await fetch(filepath);
-    const data = await response.json();
+    const dbData = await db.selectWordTable.toArray();
+    //取出dbData表格中字段tag中列表存在"zk"的数据
+    const data = dbData.filter((item: { tag: any; }) => item.tag.includes(name)); 
     jsonData.value = data;
     // 在 computed 外部定义 computed 属性，以便在其他地方使用
     paginatedData.value = computed(() => {
@@ -80,7 +90,7 @@ async function loadJSON(filepath) {
         return jsonData.value.slice(startIndex, endIndex);
       } else {
         // 使用 filter 方法筛选包含 searchValue 的数据项
-        const filterData = jsonData.value.filter(item => {
+        const filterData = jsonData.value.filter((item: { sw: string; translation: string; }) => {
             // 根据你的匹配逻辑来判断是否保留 item
             return item.sw?.includes(searchValue.value.toLowerCase()) ||
               item.translation?.includes(searchValue.value.toLowerCase()); // 例如，假设要匹配某个属性
@@ -95,45 +105,75 @@ async function loadJSON(filepath) {
   }
 }
 
-
-function formatNewlines(text) {
+function formatNewlines(text: string) {
   return text.replace(/\n/g, '<br>');
 }
 
-function handlePageChange(newPage) {
+function handlePageChange(newPage: any) {
   currentPage.value = newPage;
 }
-watch(active, (newActive) => {
-  loadJSON(tabs[newActive].filepath);
+watch(active, (newActive: number) => {
+  selectName.value = tabs[newActive].name;
+  loadJSON(tabs[newActive].name);
   currentPage.value = 1; // 重置页数
 });
 // 初始化加载第一个标签的数据
 onMounted(() => {
-  loadJSON(tabs[0].filepath);
+  loadJSON(tabs[0].name);
+  selectName.value = tabs[0].name;
 });
 
 // 添加存储功能
-
-async function addItem(item) {
-  const existingItem = await db.selectWordTable.where('sw').equals(item.sw).first();
-  if (existingItem) {
-    showNotify({ type: 'warning', message: '你添加过该单词了！' });
-    // 如果已存在相同的 sw，可以选择不添加或执行更新操作
-    return; // 不执行添加操作
-  }
-  let datetime = Date.now();
-  const newItem = {
-    sw: item.sw,
-    phonetic: item.phonetic,
-    translation: item.translation,
-    definition: item.definition,
-    datetime: datetime,
-    type: 0,
-    level: 0,
-  };
-  const id = await db.selectWordTable.add(newItem);
+const addAllLoading = ref(false);
+const removeAllLoading = ref(false);
+async function addItem(id: any) {
+  await db.selectWordTable.update(id, { isSelect: true });
   // console.log('Added item with ID:', id);
   showNotify({ type: 'success', message: '添加成功！' });
+}
+async function addAllItem() {
+  try {
+    addAllLoading.value = true;
+    // 使用Dexie的bulkUpdate方法来更新匹配标签的记录
+    console.log(selectName.value);
+    const itemsToUpdate = await db.selectWordTable
+      .filter((item: { tag: any; isSelect: boolean }) => {
+        return item.tag.includes(selectName.value) && item.isSelect === false;
+      }).toArray();
+    console.log(itemsToUpdate.length);
+    for (const item of itemsToUpdate) {
+      await db.selectWordTable.where('id').equals(item.id!).modify({ isSelect: true });
+    }
+    addAllLoading.value = false;
+    // 显示成功通知
+    showNotify({ type: 'success', message: '添加成功！' });
+  } catch (error) {
+    addAllLoading.value = false;
+    console.error('添加时出错：', error);
+    showNotify({ type: 'danger', message: '添加时出错，请重试。' });
+  }
+}
+async function removeAllItem() {
+  try {
+    removeAllLoading.value = true;
+    // 使用Dexie的bulkUpdate方法来更新匹配标签的记录
+    console.log(selectName.value);
+    const itemsToUpdate = await db.selectWordTable
+      .filter((item: { tag: any; isSelect: boolean }) => {
+        return item.tag.includes(selectName.value) && item.isSelect === true;
+      }).toArray();
+    console.log(itemsToUpdate.length);
+    for (const item of itemsToUpdate) {
+      await db.selectWordTable.where('id').equals(item.id!).modify({ isSelect: false });
+    }
+    removeAllLoading.value = false;
+    // 显示成功通知
+    showNotify({ type: 'success', message: '移除成功！' });
+  } catch (error) {
+    removeAllLoading.value = false;
+    console.error('移除时出错：', error);
+    showNotify({ type: 'danger', message: '移除时出错，请重试。' });
+  }
 }
 </script>
 <style scoped>
