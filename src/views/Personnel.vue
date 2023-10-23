@@ -74,20 +74,24 @@ request.onsuccess = function(event) {
         // totalSpace += storeSpace;
       };
     });
+    request.result.close();
   }
   catch (error) {
     console.error('打开数据库时出错:', (event.target as IDBRequest).error);
+    request.result.close();
   }
   // // 输出总空间
   // console.log(`数据库总空间占用: ${totalSpace} 字节`);
 };
 request.onerror = function(event) {
   console.error('无法打开数据库:', (event.target as IDBRequest).error);
+  request.result.close();
 };
 // 数据导入
 const importLoading: any = ref(false);
 const deleteButtonDisabled: any = ref(false);
 async function loadJSON() {
+  // 初始化dexie数据库
   try {
     importLoading.value = true;
     deleteButtonDisabled.value = true;
@@ -116,17 +120,19 @@ async function loadJSON() {
     importLoading.value = false;
     deleteButtonDisabled.value = false;
   } catch (error) {
-    console.error('加载JSON文件时发生错误:', error);
+    console.error('加载数据时发生错误:', error);
     importLoading.value = false;
     deleteButtonDisabled.value = false;
     showNotify({ type: 'danger', message: '添加失败！' });
   }
 }
-// 删除数据表格
 async function deleteDB() {
   try {
+    // 删除数据库
     await db.selectWordTable.clear();
-    showNotify({ type: 'success', message: '删除成功！' });
+    // 删除 IndexedDB
+    await indexedDB.deleteDatabase(dbName);
+    showNotify({ type: 'success', message: '删除成功！请手动刷新页面！' });
   }
   catch (error) {
     showNotify({ type: 'danger', message: '删除失败!' });
