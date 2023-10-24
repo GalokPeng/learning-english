@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import Type from '../views/Type.vue'
 import EveryDay from '../views/EveryDay.vue'
 import EveryWeek from '../views/EveryWeek.vue'
@@ -40,7 +40,7 @@ const routes = [
 ];
 
 const index = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 })
 
