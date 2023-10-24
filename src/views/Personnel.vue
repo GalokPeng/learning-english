@@ -132,6 +132,8 @@ async function deleteDB() {
     await db.selectWordTable.clear();
     // 删除 IndexedDB
     await indexedDB.deleteDatabase(dbName);
+    // 重新加载页面
+    location.reload();
     showNotify({ type: 'success', message: '删除成功！请手动刷新页面！' });
   }
   catch (error) {
